@@ -1,1 +1,1 @@
-sudo python -m cli scan -t scanme.nmap.org
+sudo python -m cli scan -t scanme.nmap.org --timeout 600

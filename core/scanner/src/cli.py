@@ -4,9 +4,12 @@ import sys
 import os
 from datetime import datetime
 from colorama import init, Fore, Style
+from utils.thread import timeout_with_process, timeout
+import time
 
 def main():
 
+    # ASCII banner
     str.print_banner()
     
     parser = argparse.ArgumentParser(
@@ -105,12 +108,10 @@ def main():
                 print(f"{Fore.BLUE}[INFO]{Style.RESET_ALL} Timeout: {args.timeout}s")
             
             scanner = NetworkScanner(verbose=args.verbose)
-            results = scanner.scan(
-                target=args.target,
-                ports=args.ports,
-                timeout=args.timeout,
-                rate_limit=args.rate
-            )
+        
+
+            results = timeout(scanner.scan, args.timeout, args.target, args.ports, args.rate)
+         
             
             # Save results
             if args.format == 'csv':
@@ -132,6 +133,9 @@ def main():
             print(f"Try running with: {Fore.YELLOW}sudo python {' '.join(sys.argv)}{Style.RESET_ALL}")
             sys.exit(1)
             
+        except TimeoutError as e:
+            print(f"Scanner timed out: {e}")
+    
         except KeyboardInterrupt:
             print(f"\n{Fore.YELLOW}[INTERRUPTED]{Style.RESET_ALL} Scan cancelled by user")
             sys.exit(0)
