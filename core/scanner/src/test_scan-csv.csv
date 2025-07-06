@@ -1,0 +1,6 @@
+timestamp,scan_id,target_ip,hostname,port,protocol,service,version,product,os_guess
+2025-07-06T01:00:53.358278,20250706_010045,127.0.0.1,localhost,21,tcp,tcpwrapped,,,Apple macOS 12 (Monterey) (Darwin 21.1.0 - 21.6.0)
+2025-07-06T01:00:53.358293,20250706_010045,127.0.0.1,localhost,22,tcp,tcpwrapped,,,Apple macOS 12 (Monterey) (Darwin 21.1.0 - 21.6.0)
+2025-07-06T01:00:53.358295,20250706_010045,127.0.0.1,localhost,80,tcp,http,2.4.25,Apache httpd,Apple macOS 12 (Monterey) (Darwin 21.1.0 - 21.6.0)
+2025-07-06T01:00:53.358298,20250706_010045,127.0.0.1,localhost,3306,tcp,tcpwrapped,,,Apple macOS 12 (Monterey) (Darwin 21.1.0 - 21.6.0)
+2025-07-06T01:00:53.358300,20250706_010045,127.0.0.1,localhost,5432,tcp,tcpwrapped,,,Apple macOS 12 (Monterey) (Darwin 21.1.0 - 21.6.0)

@@ -5,6 +5,7 @@ import json
 from typing import Dict, List, Optional
 import re
 from datetime import datetime
+from tqdm import tqdm
 
 class NetworkScanner:
     def __init__(self, verbose: bool = False):
@@ -16,36 +17,59 @@ class NetworkScanner:
         if self.verbose:
             print(f"[{level}] {message}")
     
-    def _run_nmap(self, target: str, ports: str, additional_args: List[str] = None) -> Dict:
-        """Execute nmap and return parsed results"""
-        # Build nmap command
-        cmd = ["nmap", "-oX", "-", "-sV"]  # -oX - outputs XML to stdout, -sV for version detection
-        
-        if ports and ports != "top1000":
-            cmd.extend(["-p", ports])
-        
-        if additional_args:
-            cmd.extend(additional_args)
-            
-        cmd.append(target)
-        
-        self._log(f"Running command: {' '.join(cmd)}")
-        
+    import subprocess
+
+    def _run_nmap(self, target: str, ports: str, additional_args=None):
+        cmd = [
+            "sudo", "nmap", "-sV", "-O",
+            "--stats-every", "1s",
+            "-oX", "-",
+            target
+        ]
+
+        taskprogress_re = re.compile(r'<taskprogress.*?percent="([\d\.]+)".*?/>')
+
+        xml_started = False
+        xml_lines = []
+        pbar = tqdm(total=100, desc="Nmap Progress", unit="%")
+        last_percent = 0
+
+        proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+            universal_newlines=True
+        )
+
         try:
-            # Run nmap
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
-            
-            if result.returncode != 0:
-                raise Exception(f"Nmap failed: {result.stderr}")
-            
-            # Parse XML output
-            return self._parse_nmap_xml(result.stdout)
-            
-        except subprocess.TimeoutExpired:
-            raise Exception("Scan timeout exceeded")
-        except Exception as e:
-            raise Exception(f"Scan failed: {str(e)}")
-    
+            for line in proc.stdout:
+                line = line.strip()
+                i = line.find("percent=")
+                print(i)
+                if i>1: 
+                    percent = float(line[i+9:i+13])
+                    increment = percent - last_percent
+                    if increment > 0:
+                        pbar.update(increment)
+                        last_percent = percent
+
+                # Detect start of main XML document
+                if line.startswith("<nmaprun"):
+                    xml_started = True
+
+                # Collect XML output lines (including <taskprogress> lines after xml_started)
+                if xml_started:
+                    xml_lines.append(line)
+
+            proc.wait()
+        finally:
+            pbar.close()
+
+        xml_output = "\n".join(xml_lines)
+        return self._parse_nmap_xml(xml_output)
+
     def _parse_nmap_xml(self, xml_output: str) -> Dict:
         """Parse nmap XML output into structured data"""
         try:
@@ -75,6 +99,7 @@ class NetworkScanner:
         except ET.ParseError as e:
             # Fallback to basic text parsing if XML fails
             return self._parse_nmap_text(xml_output)
+
     
     def _parse_host(self, host_elem) -> Optional[Dict]:
         """Parse individual host from XML"""
@@ -203,12 +228,3 @@ class NetworkScanner:
         self._log(f"Scan completed. Found {len(results)} services on {len(scan_results.get('hosts', []))} hosts")
         
         return results
-    
-    def scan_network(self, cidr: str) -> List[Dict]:
-        """Scan entire network range"""
-        return self.scan(cidr, ports="1-1000")
-    
-    def quick_scan(self, target: str) -> List[Dict]:
-        """Quick scan of most common ports"""
-        common_ports = "21,22,23,25,80,110,139,443,445,3306,3389,8080,8443"
-        return self.scan(target, ports=common_ports)

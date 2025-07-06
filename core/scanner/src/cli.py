@@ -6,6 +6,7 @@ from datetime import datetime
 from colorama import init, Fore, Style
 from utils.thread import timeout_with_process, timeout
 import time
+import json
 
 def main():
 
@@ -142,6 +143,8 @@ def main():
             
         except Exception as e:
             print(f"{Fore.RED}[ERROR]{Style.RESET_ALL} An unexpected error occurred: {e}")
+            traceback = json.dumps(e.with_traceback)
+            print(traceback)
             if args.verbose:
                 import traceback
                 traceback.print_exc()
