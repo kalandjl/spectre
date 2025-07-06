@@ -1,0 +1,27 @@
+# docker-compose.test-target.yml
+version: '3.8'
+
+services:
+  # All-in-one vulnerable target
+  vulnerable-target:
+    image: vulnerables/web-dvwa
+    container_name: spectre-test-target
+    ports:
+      - "80:80"        # HTTP (Apache with vulnerabilities)
+      - "21:21"        # FTP (vsftpd)
+      - "22:22"        # SSH (old OpenSSH)
+      - "3306:3306"    # MySQL
+      - "5432:5432"    # PostgreSQL
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+    networks:
+      test_net:
+        ipv4_address: 172.16.1.100
+    restart: unless-stopped
+
+networks:
+  test_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.1.0/24

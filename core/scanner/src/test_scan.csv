@@ -1,0 +1,6 @@
+timestamp,scan_id,target_ip,hostname,port,protocol,service,version,product,os_guess
+2025-07-05T21:50:04.661619,20250705_214958,127.0.0.1,localhost,21,tcp,tcpwrapped,,,
+2025-07-05T21:50:04.661651,20250705_214958,127.0.0.1,localhost,22,tcp,tcpwrapped,,,
+2025-07-05T21:50:04.661654,20250705_214958,127.0.0.1,localhost,80,tcp,http,2.4.25,Apache httpd,
+2025-07-05T21:50:04.661657,20250705_214958,127.0.0.1,localhost,3306,tcp,tcpwrapped,,,
+2025-07-05T21:50:04.661659,20250705_214958,127.0.0.1,localhost,5432,tcp,tcpwrapped,,,

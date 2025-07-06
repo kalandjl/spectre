@@ -1,3 +1,3 @@
-echo "Starting SPECTRE testing lab..."
+echo "Starting SPECTRE testing environment with docker compose..."
 
-docker-compose -f docker-compose.test-lab.yml up -d
+docker-compose up -d
