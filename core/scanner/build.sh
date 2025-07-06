@@ -1,0 +1,1 @@
+stickytape src/cli.py --output out/scanner.py
