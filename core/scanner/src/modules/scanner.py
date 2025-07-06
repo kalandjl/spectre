@@ -168,7 +168,6 @@ class NetworkScanner:
                 }
                 current_host['ports'].append(port_info)
         
-        # Don't forget the last host
         if current_host and current_host['ports']:
             results['hosts'].append(current_host)
         
