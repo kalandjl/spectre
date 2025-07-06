@@ -1,0 +1,1 @@
+sudo python -m cli scan -t scanme.nmap.org
