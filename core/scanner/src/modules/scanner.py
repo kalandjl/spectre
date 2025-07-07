@@ -6,11 +6,13 @@ from typing import Dict, List, Optional
 import re
 from datetime import datetime
 from tqdm import tqdm
+from sshkey_tools.keys import RsaPrivateKey
 
 class NetworkScanner:
     def __init__(self, verbose: bool = False):
         self.verbose = verbose
-        self.scan_id = datetime.now().strftime('%Y%m%d_%H%M%S')
+        self.scan_start = None
+        self.scan_end = None
     
     def _log(self, message: str, level: str = "INFO"):
         """Print log messages if verbose mode is enabled"""
@@ -47,13 +49,17 @@ class NetworkScanner:
             for line in proc.stdout:
                 line = line.strip()
                 i = line.find("percent=")
-                print(i)
+
                 if i>1: 
                     percent = float(line[i+9:i+13])
                     increment = percent - last_percent
                     if increment > 0:
                         pbar.update(increment)
                         last_percent = percent
+                    elif line.find("Parallel DNS resolution of"):
+                        pbar.update(increment)
+                        last_percent = percent
+
 
                 # Detect start of main XML document
                 if line.startswith("<nmaprun"):
@@ -169,6 +175,7 @@ class NetworkScanner:
         current_host = None
         
         for line in text_output.split('\n'):
+
             # Match IP address
             ip_match = re.match(r'Nmap scan report for (.+?)( \((.+?)\))?$', line)
             if ip_match:
@@ -200,6 +207,9 @@ class NetworkScanner:
     
     def scan(self, target: str, ports: str = "1-1000", timeout: int = 300, rate_limit: int = 1000) -> List[Dict]:
         """Main scan method that returns list of services found"""
+
+        self.scan_id = rsa_priv = RsaPrivateKey.generate().to_string()
+        self.scan_start = datetime.now()
         self._log(f"Starting scan of {target} on ports {ports}")
         
         # Run the scan
@@ -225,6 +235,9 @@ class NetworkScanner:
                 
                 self._log(f"Found: {result['target_ip']}:{result['port']} - {result['service']} {result['version']}")
         
-        self._log(f"Scan completed. Found {len(results)} services on {len(scan_results.get('hosts', []))} hosts")
+        
+        self.scan_end = datetime.now()
+        self._log(f"Scan completed in {(self.scan_end - self.scan_start).total_seconds():.1f}s")
+        self._log(f"Found {len(results)} services on {len(scan_results.get('hosts', []))} hosts")
         
         return results

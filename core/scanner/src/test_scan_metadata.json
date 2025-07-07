@@ -1,0 +1,12 @@
+{
+  "scan_id": "20250706_181638",
+  "target": "192.168.1.0/24",
+  "start_time": "2025-07-06T18:16:38.482964",
+  "end_time": "2025-07-06T18:20:58.496866",
+  "duration_seconds": 260.01,
+  "duration_human": "4.3m",
+  "total_hosts_scanned": 0,
+  "total_services_found": 0,
+  "scan_date": "2025-07-06",
+  "scan_time": "18:16:38"
+}

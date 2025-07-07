@@ -24,11 +24,3 @@ def validate_target(target: str) -> bool:
         return True
     
     return False
-
-def expand_cidr(cidr: str) -> List[str]:
-    """Expand CIDR to list of IPs (for custom scanning)"""
-    try:
-        network = ipaddress.ip_network(cidr, strict=False)
-        return [str(ip) for ip in network.hosts()]  # .hosts() excludes network/broadcast
-    except:
-        return []

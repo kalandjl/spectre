@@ -1,0 +1,12 @@
+{
+  "scan_id": "20250706_181002",
+  "target": "localhost",
+  "start_time": "2025-07-06T18:10:02.454516",
+  "end_time": "2025-07-06T18:10:23.850716",
+  "duration_seconds": 21.4,
+  "duration_human": "21.4s",
+  "total_hosts_scanned": 1,
+  "total_services_found": 7,
+  "scan_date": "2025-07-06",
+  "scan_time": "18:10:02"
+}

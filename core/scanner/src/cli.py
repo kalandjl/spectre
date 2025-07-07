@@ -86,12 +86,11 @@ def main():
         if not str.validate_target(args.target):
             print(f"{Fore.RED}[ERROR]{Style.RESET_ALL} Invalid target: {args.target}")
             sys.exit(1)
-
-
-
+        
         try:
             from modules.scanner import NetworkScanner
             from utils.helpers import check_dependencies
+            from utils.parser import OutputFormatter
             
             # Check if nmap is installed
             if not check_dependencies():
@@ -100,35 +99,41 @@ def main():
                 print(f"  MacOS: brew install nmap")
                 print(f"  RHEL/CentOS: sudo yum install nmap")
                 sys.exit(1)
-            
-            # Start scanning
-            print(f"{Fore.GREEN}[SCANNER]{Style.RESET_ALL} Starting scan of {args.target}")
-            if args.verbose:
-                print(f"{Fore.BLUE}[INFO]{Style.RESET_ALL} Output file: {args.output}")
-                print(f"{Fore.BLUE}[INFO]{Style.RESET_ALL} Port range: {args.ports}")
-                print(f"{Fore.BLUE}[INFO]{Style.RESET_ALL} Timeout: {args.timeout}s")
-            
-            scanner = NetworkScanner(verbose=args.verbose)
         
-
-            results = timeout(scanner.scan, args.timeout, args.target, args.ports, args.rate)
-         
+            # Initialize formatter
+            formatter = OutputFormatter()
+            
+            # Run scan
+            scan_start = datetime.now()
+            scanner = NetworkScanner(verbose=args.verbose)
+            results = scanner.scan(
+                target=args.target,
+                ports=args.ports,
+                timeout=args.timeout,
+                rate_limit=args.rate
+            )
+            scan_end = datetime.now()
+            
+            # Calculate unique hosts
+            unique_hosts = len(set(r['target_ip'] for r in results)) if results else 0
+            
+            # Set metadata
+            formatter.set_metadata(
+                scan_start=scan_start,
+                scan_end=scan_end,
+                target=args.target,
+                total_hosts=unique_hosts,
+                total_services=len(results)
+            )
             
             # Save results
             if args.format == 'csv':
-                from utils.parser import save_as_csv
-                save_as_csv(results, args.output)
+                formatter.save_as_csv(results, args.output)
             else:
-                from utils.parser import save_as_json
-                save_as_json(results, args.output)
+                formatter.save_as_json(results, args.output)
             
             # Print summary
-            print(f"\n{Fore.GREEN}[SUCCESS]{Style.RESET_ALL} Scan completed!")
-            print(f"  • Hosts scanned: {len(set(r['target_ip'] for r in results))}")
-            print(f"  • Services found: {len(results)}")
-            print(f"  • Results saved to: {args.output}")
-            print(f"\n📤 Upload your scan at: {Fore.CYAN}https://spectre.dev/upload{Style.RESET_ALL}")
-            
+            formatter.print_summary(results)
         except PermissionError:
             print(f"{Fore.RED}[ERROR]{Style.RESET_ALL} Permission denied. Network scanning requires root privileges.")
             print(f"Try running with: {Fore.YELLOW}sudo python {' '.join(sys.argv)}{Style.RESET_ALL}")
