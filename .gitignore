@@ -2,7 +2,7 @@ manifesto.md
 TODO.md
 
 # dependencies
-/node_modules
+**/node_modules
 /.pnp
 .pnp.*
 .yarn/*

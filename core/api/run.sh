@@ -1,0 +1,1 @@
+tsc --watch --outDir out --rootDir src
